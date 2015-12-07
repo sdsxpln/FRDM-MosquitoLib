@@ -15,34 +15,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- */ 
-#ifndef _SPI_H_
-#define _SPI_H_
+ */
 
-#ifdef MOSQUITO_CONFIG_SPI_ENABLED
+#include "spi.h"
 
-#define FRDM_SPI_CPOL_RISING_EDGE   0
-#define FRDM_SPI_CPOL_FALLING_EDGE  1
-#define FRDM_SPI_CPHA_FIRST_EDGE    0
-#define FRDM_SPI_CPHA_SECOND_EDGE   1
+int frdm_spi_init(SPI_Type *spi, struct frdm_spi_mode *mode, uint32_t baud) {
 
-typedef enum 
-{
-    FRDM_SPI0,
-    FRDM_SPI1,
-    FRDM_SPI2
-} frdm_spi_t;
-
-typedef enum 
-{
-    FRDM_SPI_MASTER,
-    FRDM_SPI_SLAVE
-} frdm_spi_mode_t;
-
-struct frdm_spi_mode {
-    uint8_t CPOL;
-    uint8_t CPHA;
-};
-
-#endif
-#endif
+    return 0;
+}
