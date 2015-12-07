@@ -16,10 +16,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
+#ifdef MOSQUITO_CONFIG_SPI_ENABLED
+#include "MK64F12.h"
 #include "spi.h"
+
+
 
 int frdm_spi_init(SPI_Type *spi, struct frdm_spi_mode *mode, uint32_t baud) {
 
     return 0;
 }
+
+#endif
