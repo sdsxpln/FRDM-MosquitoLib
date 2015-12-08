@@ -10,13 +10,9 @@ HEADERS+=$(wildcard drivers/*.h)
 HEADERS+=$(wildcard freescale/*.h)
 
 
-.PHONY: check_config
-
-all: check_config $(LIB)
-
-
 $(LIB): $(COBJS)
 		$(AR) rs $@ $^
 
-clean:  rm -f  $(COBJS)  
+clean:
+	@rm -f  $(COBJS)
 
