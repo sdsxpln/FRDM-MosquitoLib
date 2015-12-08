@@ -1,0 +1,3 @@
+[submodule "frdm-k64f/net/picotcp"]
+	path = frdm-k64f/net/picotcp
+	url = https://github.com/tass-belgium/picotcp.git
