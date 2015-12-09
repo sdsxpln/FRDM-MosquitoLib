@@ -23,7 +23,8 @@
 
 
 int frdm_spi_init(SPI_Type *spi, struct frdm_spi_mode *mode, uint32_t baud) {
-
+    SPI_MCR_REG(spi) |= (FRDM_SPI_MASTER<<SPI_MCR_MSTR_SHIFT);
+    SPI_MCR_REG(spi) |= (ENABLE<<SPI_MCR_CONT_SCKE_SHIFT);
     return 0;
 }
 

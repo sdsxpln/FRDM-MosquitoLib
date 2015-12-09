@@ -26,17 +26,21 @@
 #define FRDM_SPI_CPHA_FIRST_EDGE    0
 #define FRDM_SPI_CPHA_SECOND_EDGE   1
 
-typedef enum 
+// TODO move to other header file
+#define FRDM_ENABLE                 1
+#define FRDM_DISABLE                0
+
+typedef enum
 {
     FRDM_SPI0,
     FRDM_SPI1,
     FRDM_SPI2
 } frdm_spi_t;
 
-typedef enum 
+typedef enum
 {
-    FRDM_SPI_MASTER,
     FRDM_SPI_SLAVE
+    FRDM_SPI_MASTER,
 } frdm_spi_mode_t;
 
 struct frdm_spi_mode {
@@ -46,3 +50,4 @@ struct frdm_spi_mode {
 
 #endif
 #endif
+
