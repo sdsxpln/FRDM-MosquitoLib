@@ -19,12 +19,7 @@
 #ifndef _SPI_H_
 #define _SPI_H_
 
-#ifdef MOSQUITO_CONFIG_SPI_ENABLED
 
-#define FRDM_SPI_CPOL_RISING_EDGE   0
-#define FRDM_SPI_CPOL_FALLING_EDGE  1
-#define FRDM_SPI_CPHA_FIRST_EDGE    0
-#define FRDM_SPI_CPHA_SECOND_EDGE   1
 
 // TODO move to other header file
 #define FRDM_ENABLE                 1
@@ -39,15 +34,28 @@ typedef enum
 
 typedef enum
 {
-    FRDM_SPI_SLAVE
-    FRDM_SPI_MASTER,
+    FRDM_SPI_SLAVE,
+    FRDM_SPI_MASTER
 } frdm_spi_mode_t;
 
+typedef enum
+{
+  FRDM_SPI_CPOL_RISING_EDGE,
+  FRDM_SPI_CPOL_FALLING_EDGE
+} frdm_spi_cpol_t;
+
+typedef enum
+{
+  FRDM_SPI_CPHA_FIRST_EDGE,
+  FRDM_SPI_CPHA_SECOND_EDGE
+} frdm_spi_cpha_t;
+
 struct frdm_spi_mode {
-    uint8_t CPOL;
-    uint8_t CPHA;
+    frdm_spi_mode_t mode;
+    frdm_spi_cpol_t CPOL;
+    frdm_spi_cpha_t CPHA;
+    uint8_t         frame;
 };
 
-#endif
 #endif
 
