@@ -6,7 +6,6 @@
 #define led_blue_toogle() { GPIOB_PTOR |= (1 << 21); }
 
 
-#define WRITE_SPI_CMD0(byte) SPI0_PUSHR = (byte | SPI_PUSHR_CONT | ulChipSelectLine | SPI_PUSHR_CTAS_CTAR0)
 
 int main(int argc, char *argv[]) {
   SIM_SCGC5 |= SIM_SCGC5_PORTB_MASK;    /*Enable Port B Clock Gate Control*/
@@ -28,7 +27,6 @@ int main(int argc, char *argv[]) {
   while(1) {
 	led_blue_toogle();
     	delay(2000);
-        WRITE_SPI_CMD0(0x99);
   }
   return 0;
 }
