@@ -59,11 +59,11 @@ int frdm_spi_init(SPI_Type *spi, struct frdm_spi_mode *mode, uint32_t hz) {
     
     // Fifo
     SPI_MCR_REG(spi) &= ~SPI_MCR_DIS_TXF_MASK;
-    SPI_MCR_REG(spi) != 0<<SPI_MCR_DIS_TXF_SHIFT;
+    SPI_MCR_REG(spi) |= 0<<SPI_MCR_DIS_TXF_SHIFT;
 
     //Enable
     SPI_MCR_REG(spi) &= ~SPI_MCR_MDIS_MASK;
-    SPI_MCR_REG(spi) != 0<<SPI_MCR_MDIS_SHIFT;
+    SPI_MCR_REG(spi) |= 0<<SPI_MCR_MDIS_SHIFT;
 
     // Start hardware
     SPI_MCR_REG(spi) &= ~SPI_MCR_HALT_MASK;
