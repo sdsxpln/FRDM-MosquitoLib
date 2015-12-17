@@ -20,16 +20,27 @@
 #include "spi.h"
 
 #define FRDM_SPI_MIN_FRAME_SIZE 4
+#define SPI_PUSHR_PCS0_ON 0x10000
+#define SPI_CTAR_FMSZ_8BIT 0x38000000
 
 int frdm_spi_init(SPI_Type *spi, struct frdm_spi_mode *mode, uint32_t hz) {
+    unsigned char cmd = 0x01;
     if(mode->frame < FRDM_SPI_MIN_FRAME_SIZE) {
       return -1;
     }
-    // Enable clock
-    SIM_SCGC6 |= SIM_SCGC6_SPI0(FRDM_ENABLE);
+
+
+    //clear the status bits (write-1-to-clear
+    SPI0_SR = (SPI_SR_TCF_MASK | SPI_SR_EOQF_MASK | SPI_SR_TFUF_MASK | SPI_SR_TFFF_MASK | SPI_SR_RFOF_MASK | SPI_SR_RFDF_MASK); 
+    // Clear all registers
+    SPI0_TCR = 0;
+    SPI0_RSER = 0;
+    SPI0_PUSHR = 0; 
+    SPI0_CTAR0 = 0;
+
     // For debug purpose
     SPI_MCR_REG(spi) &= ~SPI_MCR_CONT_SCKE_MASK;
-    SPI_MCR_REG(spi) |= (FRDM_ENABLE<<SPI_MCR_CLR_RXF_SHIFT);
+    SPI_MCR_REG(spi) |= (FRDM_ENABLE<<SPI_MCR_CONT_SCKE_SHIFT);
     // Master/slave
     SPI_MCR_REG(spi) &= ~SPI_MCR_MSTR_MASK;
     SPI_MCR_REG(spi) |= (mode->mode<<SPI_MCR_MSTR_SHIFT);
@@ -55,19 +66,19 @@ int frdm_spi_init(SPI_Type *spi, struct frdm_spi_mode *mode, uint32_t hz) {
     SPI_CTAR_REG(spi,0) |= 0<<SPI_CTAR_PASC_SHIFT;
 
     SPI_CTAR_REG(spi,0) &= ~SPI_CTAR_DBR_MASK;
-    SPI_CTAR_REG(spi,0) |= 0<<SPI_CTAR_DBR_SHIFT;
     
     // Fifo
     SPI_MCR_REG(spi) &= ~SPI_MCR_DIS_TXF_MASK;
-    SPI_MCR_REG(spi) |= 0<<SPI_MCR_DIS_TXF_SHIFT;
 
     //Enable
     SPI_MCR_REG(spi) &= ~SPI_MCR_MDIS_MASK;
-    SPI_MCR_REG(spi) |= 0<<SPI_MCR_MDIS_SHIFT;
 
     // Start hardware
     SPI_MCR_REG(spi) &= ~SPI_MCR_HALT_MASK;
-    SPI_MCR_REG(spi) |= 0<<SPI_MCR_HALT_SHIFT;
+
+
+
+
     return 0;
 }
 
