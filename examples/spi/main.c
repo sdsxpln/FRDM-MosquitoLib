@@ -32,8 +32,9 @@ int main(int argc, char *argv[]) {
   frdm_spi_init(SPI0,&mode,0);
 
   while(1) {
-	led_blue_toogle();
-    	delay(2000);
+	 led_blue_toogle();
+   delay(2000);
+   frdm_spi_master_write(SPI0, 0xAA);
   }
   return 0;
 }

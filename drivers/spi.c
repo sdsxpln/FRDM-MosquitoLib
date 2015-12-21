@@ -21,8 +21,28 @@
 
 #define FRDM_SPI_MIN_FRAME_SIZE 4
 #define SPI_PUSHR_PCS0_ON 0x10000
+#define SPI_PUSHR_PCS1_ON 0x20000
+#define SPI_PUSHR_PCS2_ON 0x40000
+#define SPI_PUSHR_PCS3_ON 0x80000
+#define SPI_PUSHR_PCS4_ON 0x100000
+#define SPI_PUSHR_PCS5_ON 0x200000
 #define SPI_CTAR_FMSZ_8BIT 0x38000000
+#define SPI_CTAR_FMSZ_16BIT 0x78000000
 
+
+
+void frdm_spi_IRQHandler(SPI_Type *spi) {
+}
+void SPI0_IRQHandler(void) {
+   frdm_spi_IRQHandler(SPI0);
+}
+
+void SPI1_IRQHandler(void) {
+   frdm_spi_IRQHandler(SPI1);
+}
+void SPI2_IRQHandler(void) {
+   frdm_spi_IRQHandler(SPI2);
+}
 int frdm_spi_init(SPI_Type *spi, struct frdm_spi_mode *mode, uint32_t hz) {
     unsigned char cmd = 0x01;
     if(mode->frame < FRDM_SPI_MIN_FRAME_SIZE) {
@@ -82,17 +102,20 @@ int frdm_spi_init(SPI_Type *spi, struct frdm_spi_mode *mode, uint32_t hz) {
     return 0;
 }
 
-uint16_t frdm_spi_master_write(SPI_Type *spi, uint16_t value) {
+uint16_t frdm_spi_master_write(SPI_Type *spi, uint8_t value) {
 
-    // Wait if FIFO is full
-    while(!SPI_BRD_SR_TFFF(spi));
-    /** Fill FIFO **/
-    //clear flags 
-    // Wait if receive FIFO is full
-    while(!SPI_BRD_SR_RFDF(spi));
-    //Clear flags
+    SPI_MCR_REG(spi) |=  SPI_MCR_HALT_MASK;
+    SPI_MCR_REG(spi) |= (SPI_MCR_CLR_RXF_MASK | SPI_MCR_CLR_TXF_MASK); //flush the fifos
+    SPI_SR_REG(spi)  |= (SPI_SR_TCF_MASK | SPI_SR_EOQF_MASK | SPI_SR_TFUF_MASK | SPI_SR_TFFF_MASK | SPI_SR_RFOF_MASK | SPI_SR_RFDF_MASK); //clear the status bits (write-1-to-clear)
 
-    // Return readed data
+    SPI_TCR_REG(spi) |= SPI_TCR_SPI_TCNT_MASK;
+    SPI_MCR_REG(spi) &=  ~SPI_MCR_HALT_MASK;
+
+    SPI_PUSHR_REG(spi) = (SPI_PUSHR_CONT_MASK | SPI_PUSHR_PCS0_ON | value);
+    while(!(SPI_SR_REG(spi) & SPI_SR_TCF_MASK));
+
+    SPI_SR_REG(spi) |= SPI_SR_TFFF_MASK; //clear the status bits (write-1-to-clear)
+
     return 0;
 }
 
