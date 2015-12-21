@@ -31,6 +31,10 @@
 
 
 
+static const uint32_t scaler[] = {2,4,6,8,16,32,64,128,256,512,1024,2048,4096,8192,16384,32768};
+static const uint32_t prescaler[] = { 2,3,5,7};
+static void setBaudRate(SPI_Type* spi,uint32_t hz);
+
 void frdm_spi_IRQHandler(SPI_Type *spi) {
 }
 void SPI0_IRQHandler(void) {
@@ -86,7 +90,9 @@ int frdm_spi_init(SPI_Type *spi, struct frdm_spi_mode *mode, uint32_t hz) {
     SPI_CTAR_REG(spi,0) |= 0<<SPI_CTAR_PASC_SHIFT;
 
     SPI_CTAR_REG(spi,0) &= ~SPI_CTAR_DBR_MASK;
-    
+    SPI_CTAR_REG(spi,0) &= ~SPI_CTAR_BR_MASK;
+    SPI_CTAR_REG(spi,0) &= ~SPI_CTAR_PBR_MASK;
+    setBaudRate(spi,hz);
     // Fifo
     SPI_MCR_REG(spi) &= ~SPI_MCR_DIS_TXF_MASK;
 
@@ -101,7 +107,29 @@ int frdm_spi_init(SPI_Type *spi, struct frdm_spi_mode *mode, uint32_t hz) {
 
     return 0;
 }
-
+static void setBaudRate(SPI_Type* spi,uint32_t hz) {
+  uint32_t br;
+  uint32_t pbr;
+  uint32_t i,j;
+  uint32_t tmp;
+  uint32_t prev = 0;
+  uint32_t source = 120000000;
+  for(i = 0; i < 16; i++) {
+    for(j = 0; pbr < 4; pbr++) {
+      tmp = source/(scaler[i] * prescaler[j]);
+      // Dont exceed desired frequency
+      if(tmp >= hz) {
+        if(tmp-hz <= prev-hz || !prev) {
+          br = scaler[i];
+          pbr = prescaler[i];
+          prev = tmp;
+        }
+      }
+    }
+  }
+  SPI_CTAR_REG(spi,0) |= br<<SPI_CTAR_BR_SHIFT;
+  SPI_CTAR_REG(spi,0) |= pbr<<SPI_CTAR_PBR_SHIFT;
+}
 uint16_t frdm_spi_master_write(SPI_Type *spi, uint8_t value) {
 
     SPI_MCR_REG(spi) |=  SPI_MCR_HALT_MASK;
@@ -111,7 +139,8 @@ uint16_t frdm_spi_master_write(SPI_Type *spi, uint8_t value) {
     SPI_TCR_REG(spi) |= SPI_TCR_SPI_TCNT_MASK;
     SPI_MCR_REG(spi) &=  ~SPI_MCR_HALT_MASK;
 
-    SPI_PUSHR_REG(spi) = (SPI_PUSHR_CONT_MASK | SPI_PUSHR_PCS0_ON | value);
+    // One word transfer
+    SPI_PUSHR_REG(spi) = (~SPI_PUSHR_CONT_MASK | SPI_PUSHR_EOQ_MASK | SPI_PUSHR_PCS0_ON | value);
     while(!(SPI_SR_REG(spi) & SPI_SR_TCF_MASK));
 
     SPI_SR_REG(spi) |= SPI_SR_TFFF_MASK; //clear the status bits (write-1-to-clear)
