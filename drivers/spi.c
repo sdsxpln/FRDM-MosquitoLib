@@ -84,10 +84,6 @@ int frdm_spi_init(SPI_Type *spi, struct frdm_spi_mode *mode, uint32_t hz) {
       /*TODO*/
     }
     //frequency
-    SPI_CTAR_REG(spi,0) &= ~SPI_CTAR_ASC_MASK;
-    SPI_CTAR_REG(spi,0) |= 1<<SPI_CTAR_ASC_SHIFT;
-    SPI_CTAR_REG(spi,0) &= ~SPI_CTAR_PASC_MASK;
-    SPI_CTAR_REG(spi,0) |= 0<<SPI_CTAR_PASC_SHIFT;
 
     SPI_CTAR_REG(spi,0) &= ~SPI_CTAR_DBR_MASK;
     SPI_CTAR_REG(spi,0) &= ~SPI_CTAR_BR_MASK;
