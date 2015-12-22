@@ -63,8 +63,8 @@ int frdm_spi_init(SPI_Type *spi, struct frdm_spi_mode *mode, uint32_t hz) {
     SPI0_CTAR0 = 0;
 
     // For debug purpose
-    SPI_MCR_REG(spi) &= ~SPI_MCR_CONT_SCKE_MASK;
-    SPI_MCR_REG(spi) |= (FRDM_ENABLE<<SPI_MCR_CONT_SCKE_SHIFT);
+    //SPI_MCR_REG(spi) &= ~SPI_MCR_CONT_SCKE_MASK;
+    //SPI_MCR_REG(spi) |= (FRDM_ENABLE<<SPI_MCR_CONT_SCKE_SHIFT);
     // Master/slave
     SPI_MCR_REG(spi) &= ~SPI_MCR_MSTR_MASK;
     SPI_MCR_REG(spi) |= (mode->mode<<SPI_MCR_MSTR_SHIFT);
@@ -97,8 +97,8 @@ int frdm_spi_init(SPI_Type *spi, struct frdm_spi_mode *mode, uint32_t hz) {
 
     // Start hardware
     SPI_MCR_REG(spi) &= ~SPI_MCR_HALT_MASK;
-
-
+    // Enable transmit/receive
+    SPI_SR_REG(spi) |= 1<<SPI_SR_TXRXS_SHIFT;
 
 
     return 0;
@@ -131,8 +131,9 @@ static void setBaudRate(SPI_Type* spi,uint32_t hz) {
   SPI_CTAR_REG(spi,0) |= SPI_CTAR_DBR(dbr-1);
   SPI_CTAR_REG(spi,0) |= SPI_CTAR_PBR(pbr);
 }
-uint16_t frdm_spi_master_write(SPI_Type *spi, uint8_t value) {
 
+uint16_t frdm_spi_master_write(SPI_Type *spi, uint8_t *value, uint32_t length) {
+    uint32_t i;
     SPI_MCR_REG(spi) |=  SPI_MCR_HALT_MASK;
     SPI_MCR_REG(spi) |= (SPI_MCR_CLR_RXF_MASK | SPI_MCR_CLR_TXF_MASK); //flush the fifos
     SPI_SR_REG(spi)  |= (SPI_SR_TCF_MASK | SPI_SR_EOQF_MASK | SPI_SR_TFUF_MASK | SPI_SR_TFFF_MASK | SPI_SR_RFOF_MASK | SPI_SR_RFDF_MASK); //clear the status bits (write-1-to-clear)
@@ -140,13 +141,33 @@ uint16_t frdm_spi_master_write(SPI_Type *spi, uint8_t value) {
     SPI_TCR_REG(spi) |= SPI_TCR_SPI_TCNT_MASK;
     SPI_MCR_REG(spi) &=  ~SPI_MCR_HALT_MASK;
 
-    // One word transfer
-    SPI_PUSHR_REG(spi) = (~SPI_PUSHR_CONT_MASK | SPI_PUSHR_EOQ_MASK | SPI_PUSHR_PCS0_ON | value);
-    while(!(SPI_SR_REG(spi) & SPI_SR_TCF_MASK));
+    for(i = 0; i<length-1; i++) {
+      SPI0_PUSHR = (SPI_PUSHR_CONT_MASK | SPI_PUSHR_PCS0_ON | *value);
+      while(!(SPI0_SR & SPI_SR_TCF_MASK));
+      value++;
+    }
+    // One byte transfer
+    SPI_PUSHR_REG(spi) = (~SPI_PUSHR_CONT_MASK | SPI_PUSHR_EOQ_MASK | SPI_PUSHR_PCS0_ON | *value);
 
     SPI_SR_REG(spi) |= SPI_SR_TFFF_MASK; //clear the status bits (write-1-to-clear)
 
     return 0;
 }
 
+uint16_t frdm_spi_master_read(SPI_Type *spi, uint8_t *value, uint32_t length) {
+    uint32_t i;
+    SPI_MCR_REG(spi) |=  SPI_MCR_HALT_MASK;
+    SPI_MCR_REG(spi) |= (SPI_MCR_CLR_RXF_MASK | SPI_MCR_CLR_TXF_MASK); //flush the fifos
+
+    SPI_SR_REG(spi) |= (SPI_SR_TCF_MASK | SPI_SR_EOQF_MASK | SPI_SR_TFUF_MASK | SPI_SR_TFFF_MASK | SPI_SR_RFOF_MASK | SPI_SR_RFDF_MASK); //clear the status bits (write-1-to-clear)
+
+    SPI_TCR_REG(spi) |= SPI_TCR_SPI_TCNT_MASK;
+    SPI_MCR_REG(spi) &=  ~SPI_MCR_HALT_MASK;
+
+    for(i=0; i<length; i++) {
+        while (!(SPI0_SR & SPI_SR_RFDF_MASK)  );
+        *value  = SPI0_POPR; //read
+        SPI0_SR = SPI_SR_RFDF_MASK;   // clear the reception flag (not self-clearing)
+    }
+}
 
