@@ -131,7 +131,22 @@ static void setBaudRate(SPI_Type* spi,uint32_t hz) {
   SPI_CTAR_REG(spi,0) |= SPI_CTAR_DBR(dbr-1);
   SPI_CTAR_REG(spi,0) |= SPI_CTAR_PBR(pbr);
 }
+uint16_t frdm_spi_master_write_byte(SPI_Type *spi, uint8_t value) {
 
+    SPI_MCR_REG(spi) |=  SPI_MCR_HALT_MASK;
+    SPI_MCR_REG(spi) |= (SPI_MCR_CLR_RXF_MASK | SPI_MCR_CLR_TXF_MASK); //flush the fifos
+    SPI_SR_REG(spi)  |= (SPI_SR_TCF_MASK | SPI_SR_EOQF_MASK | SPI_SR_TFUF_MASK | SPI_SR_TFFF_MASK | SPI_SR_RFOF_MASK | SPI_SR_RFDF_MASK); //clear the status bits (write-1-to-clear)
+
+    SPI_TCR_REG(spi) |= SPI_TCR_SPI_TCNT_MASK;
+    SPI_MCR_REG(spi) &=  ~SPI_MCR_HALT_MASK;
+
+    // One byte transfer
+    SPI_PUSHR_REG(spi) = (~SPI_PUSHR_CONT_MASK | SPI_PUSHR_EOQ_MASK | SPI_PUSHR_PCS0_ON | value);
+
+    SPI_SR_REG(spi) |= SPI_SR_TFFF_MASK; //clear the status bits (write-1-to-clear)
+
+    return 0;
+}
 uint16_t frdm_spi_master_write(SPI_Type *spi, uint8_t *value, uint32_t length) {
     uint32_t i;
     SPI_MCR_REG(spi) |=  SPI_MCR_HALT_MASK;
