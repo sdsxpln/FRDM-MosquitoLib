@@ -108,27 +108,32 @@ int frdm_spi_init(SPI_Type *spi, struct frdm_spi_mode *mode, uint32_t hz) {
     return 0;
 }
 static void setBaudRate(SPI_Type* spi,uint32_t hz) {
-  uint32_t br;
-  uint32_t pbr;
-  uint32_t i,j;
+  uint32_t br = 0;
+  uint32_t pbr= 0;
+  uint32_t dbr= 1;
+  uint32_t i,j,l;
   uint32_t tmp;
   uint32_t prev = 0;
   uint32_t source = 120000000;
   for(i = 0; i < 16; i++) {
-    for(j = 0; pbr < 4; pbr++) {
-      tmp = source/(scaler[i] * prescaler[j]);
-      // Dont exceed desired frequency
-      if(tmp >= hz) {
-        if(tmp-hz <= prev-hz || !prev) {
-          br = scaler[i];
-          pbr = prescaler[i];
-          prev = tmp;
+    for(j = 0; j < 4; j++) {
+      for(l = 1; l <3; l++) {
+        tmp = (source*l)/(scaler[i] * prescaler[j]);
+        // Dont exceed desired frequency
+        if(tmp <= hz) {
+          if(hz-tmp <= hz-prev || !prev) {
+            br = i;
+            pbr = j;
+            dbr = l;
+            prev = tmp;
+          }
         }
       }
     }
   }
-  SPI_CTAR_REG(spi,0) |= br<<SPI_CTAR_BR_SHIFT;
-  SPI_CTAR_REG(spi,0) |= pbr<<SPI_CTAR_PBR_SHIFT;
+  SPI_CTAR_REG(spi,0) |= SPI_CTAR_BR(br);
+  SPI_CTAR_REG(spi,0) |= SPI_CTAR_DBR(dbr-1);
+  SPI_CTAR_REG(spi,0) |= SPI_CTAR_PBR(pbr);
 }
 uint16_t frdm_spi_master_write(SPI_Type *spi, uint8_t value) {
 

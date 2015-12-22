@@ -29,7 +29,7 @@ int main(int argc, char *argv[]) {
   mode.CPHA = FRDM_SPI_CPHA_FIRST_EDGE;
   mode.frame = 8;
 
-  frdm_spi_init(SPI0,&mode,0);
+  frdm_spi_init(SPI0,&mode,1000000);
 
   while(1) {
 	 led_blue_toogle();
