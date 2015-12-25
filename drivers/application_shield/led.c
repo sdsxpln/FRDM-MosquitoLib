@@ -29,8 +29,8 @@ void frdm_as_led_init() {
     SIM_SCGC6 |= SIM_SCGC6_FTM0_MASK;
     SIM_SOPT4 |= SIM_SOPT4_FTM0TRG0SRC(1);
 
-    //NOTE: multiplexing port pta0 will cause cpu to hard fault on revision other then E
-    // because it's also routed to the debugger
+    //NOTE: multiplexing port pta0 will cause cpu to hard fault on revision other than E
+    // because it's also routed to the debugge, on normal run it works finer
     PORTA_PCR2 = PORT_PCR_MUX(3);  // FTM0_CH7
     PORTC_PCR4 = PORT_PCR_MUX(4);  // FTM0_CH3
     //PORTA_PCR0 = PORT_PCR_MUX(3);  // FTM0_CH5
