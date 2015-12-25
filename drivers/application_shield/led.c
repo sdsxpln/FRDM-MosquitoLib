@@ -16,7 +16,7 @@ static uint32_t _B = 0;
 
 static inline void RGB_LED(uint32_t red, uint32_t green, uint32_t blue) {
     //FTM0_C5V = red;
-    FTM0_C4V = green;
+    FTM0_C3V = green;
     FTM0_C7V = blue;
     _R = red;
     _G = green;
