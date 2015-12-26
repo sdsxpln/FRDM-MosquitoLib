@@ -1,4 +1,5 @@
 #include "MK64F12.h"
+#include "led.h"
 
 #define led_blue_init() { SIM_SCGC5 |= SIM_SCGC5_PORTB_MASK; PORTB_PCR21 = PORT_PCR_MUX(1); GPIOB_PDDR |= (1 << 21); }
 #define led_blue_toogle() { GPIOB_PTOR |= (1 << 21); }
@@ -15,10 +16,8 @@ int main(void)
   for (;;) {
     //Blink led on board
     led_blue_toogle();
-    // Blink green led on application shiel
-    frdm_as_led_toggle_G();
-    frdm_as_led_toggle_R();
-    frdm_as_led_toggle_B();
+    // Blink red led on application shield
+    frdm_as_led_toggle_R(FRDM_AS_LED_INT_NORMAL);
     delay(2000);
   }
   return 0;
