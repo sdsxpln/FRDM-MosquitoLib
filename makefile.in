@@ -1,6 +1,3 @@
-#Fernando Luiz Cola
-#25/09/2015
-
 #Toolchain and Path Configuration
 PREFIX=arm-none-eabi-
 CC=$(PREFIX)gcc
@@ -20,7 +17,7 @@ ASOBJ=$(patsubst  %.S, %.o, $(ASSRC) )
 
 #GNU ARM GCC Configuration and Platform configurations
 ARCHFLAGS=-mthumb -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mfpu=fpv4-sp-d16
-INCLUDE=-I$(ROOT)/includes/ -I$(ROOT)/drivers -I$(ROOT)/application_shield
+INCLUDE=-I$(ROOT)/includes/ -I$(ROOT)/drivers -I$(ROOT)/drivers/application_shield
 CFLAGS= -O0 -fmessage-length=0 -fsigned-char -ffunction-sections -fdata-sections -g3 \
 	 -Xlinker --gc-sections -specs=nano.specs -specs=nosys.specs
 LDFLAGS= $(ARCHFLAGS) -T $(ROOT)/freescale/"MK64FN1M0xxx12_flash.ld" -L"./" -Wl,-Map,$(TARGET).map
