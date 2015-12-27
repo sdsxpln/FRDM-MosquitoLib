@@ -1,5 +1,5 @@
 /*******************************************************
- * Led module
+ * Led module (application shield)
  * The led is routed as followed:
  * R       PTA2
  * G       PTC4
@@ -18,7 +18,7 @@
  *                 unsupported
  **********************************************************/
 #include "MK64F12.h"
-#include "led.h"
+#include "as_led.h"
 
 static uint8_t _R = 0;
 static uint8_t _G = 0;
