@@ -17,7 +17,7 @@ void frdm_led_init() {
 
     PORTB_PCR22 = PORT_PCR_MUX(1);
     PORTE_PCR26 = PORT_PCR_MUX(1);
-    PORTB_PCR21 = PORT_PCR_MUX(3);
+    PORTB_PCR21 = PORT_PCR_MUX(1);
 
     // Set port as output
     GPIOB_PDDR |= (1 << 22);
