@@ -1,5 +1,5 @@
-#ifndef _LED_H_
-#define _LED_H_
+#ifndef _AS_LED_H_
+#define _AS_LED_H_
 
 #define FRDM_AS_LED_INT_NORMAL  50
 #define FRDM_AS_LED_INT_HIGH   100
