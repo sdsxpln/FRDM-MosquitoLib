@@ -57,5 +57,11 @@ struct frdm_spi_mode {
     uint8_t         frame;
 };
 
+
+
+int frdm_spi_init(SPI_Type *spi, struct frdm_spi_mode *mode, uint32_t hz);
+uint16_t frdm_spi_master_write_byte(SPI_Type *spi, uint8_t value);
+uint16_t frdm_spi_master_write(SPI_Type *spi, uint8_t *value, uint32_t length);
+uint16_t frdm_spi_master_read(SPI_Type *spi, uint8_t *value, uint32_t length);
 #endif
 
