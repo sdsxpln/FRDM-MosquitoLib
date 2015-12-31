@@ -31,25 +31,43 @@
 
 
 static uint8_t buffer[LCD_BUFFER_SIZE];
-
+static uint16_t char_x = 0;
+static uint16_t char_y = 0;
 void frdm_as_lcd_out(uint8_t cmd)
 {
   GPIOC_PCOR |= (1<<3); //A0  = 0
   GPIOD_PCOR |= (1<<0); //CS  = 0
   frdm_spi_master_write_byte(SPI0, cmd);
   GPIOD_PSOR |= (1<<0); //CS  = 1
+  GPIOC_PCOR |= (1<<3); //A0  = 1
 }
 void frdm_as_lcd_out_data(uint8_t data) {
   GPIOC_PSOR |= (1<<3); //A0  = 1
   GPIOD_PCOR |= (1<<0); //CS  = 0
   frdm_spi_master_write_byte(SPI0, data);
   GPIOD_PSOR |= (1<<0); //CS  = 1
+  GPIOC_PSOR |= (1<<3); //A0  = 0
 }
 /** TODO move to other module **/
 void wait_ms(uint32_t ms) {
   volatile uint32_t i;
   for(i=0; i<120000*ms; i++) {
     // do nothing
+  }
+}
+static void set_pixel(uint16_t x, uint16_t y, int erase) {
+  if(erase)
+    buffer[x + ((y/8) * LCD_BUFFER_SIZE/LCD_TOTAL_PAGES)] &= ~(1 << (y%8));
+  else
+    buffer[x + ((y/8) * LCD_BUFFER_SIZE/LCD_TOTAL_PAGES)] |= (1 << (y%8));
+}
+void frdm_as_lcd_putc(uint16_t x, uint16_t y, uint8_t ch) {
+
+}
+void frdm_as_lcd_print(char *text) {
+  while(*text != '\0') {
+
+    text++;
   }
 }
 static void frdm_as_lcd_update(void) {
@@ -66,12 +84,14 @@ static void frdm_as_lcd_update(void) {
 }
 void frdm_as_lcd_init()
 {
+  SIM_SCGC5 |= SIM_SCGC5_PORTC_MASK;    /*Enable Port C Clock Gate Control*/
+  SIM_SCGC5 |= SIM_SCGC5_PORTD_MASK;    /*Enable Port D Clock Gate Control*/
   PORTC_PCR3 = PORT_PCR_MUX(1);
   PORTD_PCR0 = PORT_PCR_MUX(1);
   GPIOC_PDDR |= (1 << 3);
   GPIOD_PDDR |= (1 << 0);
 
-  memset(buffer, 0, LCD_BUFFER_SIZE);
+  memset(buffer, 0xFF, LCD_BUFFER_SIZE);
   struct frdm_spi_mode mode;
   mode.mode = FRDM_SPI_MASTER;
   mode.CPOL = FRDM_SPI_CPOL_FALLING_EDGE;
