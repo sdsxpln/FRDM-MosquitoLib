@@ -33,6 +33,7 @@
 static uint8_t buffer[LCD_BUFFER_SIZE];
 static uint16_t char_x = 0;
 static uint16_t char_y = 0;
+
 void frdm_as_lcd_out(uint8_t cmd)
 {
   GPIOC_PCOR |= (1<<3); //A0  = 0
@@ -41,6 +42,7 @@ void frdm_as_lcd_out(uint8_t cmd)
   GPIOD_PSOR |= (1<<0); //CS  = 1
   GPIOC_PCOR |= (1<<3); //A0  = 1
 }
+
 void frdm_as_lcd_out_data(uint8_t data) {
   GPIOC_PSOR |= (1<<3); //A0  = 1
   GPIOD_PCOR |= (1<<0); //CS  = 0
@@ -48,6 +50,7 @@ void frdm_as_lcd_out_data(uint8_t data) {
   GPIOD_PSOR |= (1<<0); //CS  = 1
   GPIOC_PSOR |= (1<<3); //A0  = 0
 }
+
 /** TODO move to other module **/
 void wait_ms(uint32_t ms) {
   volatile uint32_t i;
@@ -55,14 +58,53 @@ void wait_ms(uint32_t ms) {
     // do nothing
   }
 }
+
 static void set_pixel(uint16_t x, uint16_t y, int erase) {
   if(erase)
     buffer[x + ((y/8) * LCD_BUFFER_SIZE/LCD_TOTAL_PAGES)] &= ~(1 << (y%8));
   else
     buffer[x + ((y/8) * LCD_BUFFER_SIZE/LCD_TOTAL_PAGES)] |= (1 << (y%8));
 }
-void frdm_as_lcd_putc(uint16_t x, uint16_t y, uint8_t ch) {
 
+void frdm_as_lcd_putc(uint16_t x, uint16_t y, uint8_t ch) {
+    unsigned int hor,vert,offset,bpl,j,i,b;
+    unsigned char* zeichen;
+    unsigned char z,w;
+
+    if ((c < 31) || (c > 127)) return;   // test char range
+
+    // read font parameter from start of array
+    offset = font[0];                    // bytes / char
+    hor = font[1];                       // get hor size of font
+    vert = font[2];                      // get vert size of font
+    bpl = font[3];                       // bytes per line
+
+    if (char_x + hor > width()) {
+        char_x = 0;
+        char_y = char_y + vert;
+        if (char_y >= height() - font[2]) {
+            char_y = 0;
+        }
+    }
+
+    zeichen = &font[((c -32) * offset) + 4]; // start of char bitmap
+    w = zeichen[0];                          // width of actual char
+    // construct the char into the buffer
+    for (j=0; j<vert; j++) {  //  vert line
+        for (i=0; i<hor; i++) {   //  horz line
+            z =  zeichen[bpl * i + ((j & 0xF8) >> 3)+1];
+            b = 1 << (j & 0x07);
+            if (( z & b ) == 0x00) {
+                pixel(x+i,y+j,0);
+            } else {
+                pixel(x+i,y+j,1);
+            }
+
+        }
+    }
+
+    char_x += w;
+}
 }
 void frdm_as_lcd_print(char *text) {
   while(*text != '\0') {
