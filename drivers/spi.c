@@ -113,8 +113,8 @@ static void setBaudRate(SPI_Type* spi,uint32_t hz) {
   uint32_t source = 120000000;
   for(i = 0; i < 16; i++) {
     for(j = 0; j < 4; j++) {
-      for(l = 1; l <3; l++) {
-        tmp = (source*l)/(scaler[i] * prescaler[j]);
+      for(l = 0; l <2; l++) {
+        tmp = (source*(1+l))/(scaler[i] * prescaler[j]);
         // Dont exceed desired frequency
         if(tmp <= hz) {
           if(hz-tmp <= hz-prev || !prev) {
@@ -128,7 +128,7 @@ static void setBaudRate(SPI_Type* spi,uint32_t hz) {
     }
   }
   SPI_CTAR_REG(spi,0) |= SPI_CTAR_BR(br);
-  SPI_CTAR_REG(spi,0) |= SPI_CTAR_DBR(dbr-1);
+  SPI_CTAR_REG(spi,0) |= SPI_CTAR_DBR(dbr);
   SPI_CTAR_REG(spi,0) |= SPI_CTAR_PBR(pbr);
 }
 uint16_t frdm_spi_master_write_byte(SPI_Type *spi, uint8_t value) {
@@ -141,7 +141,7 @@ uint16_t frdm_spi_master_write_byte(SPI_Type *spi, uint8_t value) {
     SPI_MCR_REG(spi) &=  ~SPI_MCR_HALT_MASK;
 
     // One byte transfer
-    SPI_PUSHR_REG(spi) = (~SPI_PUSHR_CONT_MASK | SPI_PUSHR_EOQ_MASK | SPI_PUSHR_PCS0_ON | value);
+    SPI_PUSHR_REG(spi) = (value | SPI_PUSHR_EOQ_MASK | SPI_PUSHR_PCS0_ON);
 
     SPI_SR_REG(spi) |= SPI_SR_TFFF_MASK; //clear the status bits (write-1-to-clear)
 
