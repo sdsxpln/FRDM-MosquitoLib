@@ -23,7 +23,6 @@ int main(int argc, char *argv[])
   PORTD_PCR(2) = PORT_PCR_MUX(2); //SOUT
   PORTD_PCR(3) = PORT_PCR_MUX(2); //SIN
   led_blue_init();
-  led_blue_toogle();
 
   struct frdm_spi_mode mode;
   mode.mode = FRDM_SPI_MASTER;
@@ -38,13 +37,7 @@ int main(int argc, char *argv[])
   while(1) {
    led_blue_togle();
    frdm_spi_master_write(SPI0, value, 2);
-   delay(1);
+   system_delay_us(10);
   }
   return 0;
-}
-
-void delay(int time)
-{
-  int i = 0;
-  for (i = time*1000 ; i !=0; i--) { }
 }

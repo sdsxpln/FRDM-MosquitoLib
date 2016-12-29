@@ -1,5 +1,16 @@
 #include "MK64F12.h"
 #include "system.h"
+
+/**
+ * Busy loop
+ * Use timers for an exact amount of time!
+ */
+void system_delay_us(uint32_t us)
+{
+  volatile uint32_t i = us*system_get_clk()/1000/1000;
+  for(; i>0; i--);
+}
+
 /**
  * FOR DEBUG PURPOSE
  * route flexbus clock to PCR3 so you can validate

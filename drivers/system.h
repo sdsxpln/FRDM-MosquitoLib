@@ -7,5 +7,6 @@ void system_route_flexbusclk();
 uint32_t system_get_busclk();
 uint32_t system_get_clk();
 void system_init();
+void system_delay_us(uint32_t us);
 
 #endif
