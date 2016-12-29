@@ -71,7 +71,8 @@ void frdm_as_lcd_putc(uint16_t x, uint16_t y, uint8_t ch) {
     unsigned char* zeichen;
     unsigned char z,w;
 
-    if ((c < 31) || (c > 127)) return;   // test char range
+    uint8_t *font;
+    if ((ch < 31) || (ch > 127)) return;   // test char range
 
     // read font parameter from start of array
     offset = font[0];                    // bytes / char
@@ -87,7 +88,7 @@ void frdm_as_lcd_putc(uint16_t x, uint16_t y, uint8_t ch) {
         }
     }
 
-    zeichen = &font[((c -32) * offset) + 4]; // start of char bitmap
+    zeichen = &font[((ch -32) * offset) + 4]; // start of char bitmap
     w = zeichen[0];                          // width of actual char
     // construct the char into the buffer
     for (j=0; j<vert; j++) {  //  vert line
@@ -104,7 +105,6 @@ void frdm_as_lcd_putc(uint16_t x, uint16_t y, uint8_t ch) {
     }
 
     char_x += w;
-}
 }
 void frdm_as_lcd_print(char *text) {
   while(*text != '\0') {
@@ -139,7 +139,8 @@ void frdm_as_lcd_init()
   mode.CPOL = FRDM_SPI_CPOL_FALLING_EDGE;
   mode.CPHA = FRDM_SPI_CPHA_SECOND_EDGE;
   mode.frame = 8;
-  frdm_spi_init(SPI0, &mode, 20000000);
+  mode.baud = 20000000;
+  frdm_spi_init(SPI0, &mode);
 
   // Overwrite spi port , MISO is used as reset line
   PORTD_PCR3 = PORT_PCR_MUX(1);

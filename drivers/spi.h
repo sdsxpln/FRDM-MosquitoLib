@@ -1,5 +1,5 @@
 /*
- * FRDM-MosquitoLibrary 
+ * FRDM-MosquitoLibrary
  * Copyright (C) <2015>  Roel Postelmans <postelmansroel@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- */ 
+ */
 #ifndef _SPI_H_
 #define _SPI_H_
 
@@ -55,11 +55,11 @@ struct frdm_spi_mode {
     frdm_spi_cpol_t CPOL;
     frdm_spi_cpha_t CPHA;
     uint8_t         frame;
+    uint32_t      bus_clk;
+    uint32_t      baud;
 };
 
-
-
-int frdm_spi_init(SPI_Type *spi, struct frdm_spi_mode *mode, uint32_t hz);
+int frdm_spi_init(SPI_Type *spi, struct frdm_spi_mode *mode);
 uint16_t frdm_spi_master_write_byte(SPI_Type *spi, uint8_t value);
 uint16_t frdm_spi_master_write(SPI_Type *spi, uint8_t *value, uint32_t length);
 uint16_t frdm_spi_master_read(SPI_Type *spi, uint8_t *value, uint32_t length);
