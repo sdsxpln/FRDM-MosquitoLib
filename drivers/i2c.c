@@ -94,6 +94,7 @@ static void i2c_stop(I2C_Type *i2c)
   // code provided with the freedom board
   for (n = 0; n < 200; n++) asm("nop");
 }
+
 static void i2c_start(I2C_Type *i2c)
 {
   I2C_C1_REG(i2c) |= I2C_C1_MST(1);
@@ -115,8 +116,7 @@ static void i2c_wait_rx(I2C_Type *i2c)
 
 void i2c_init(struct i2c_mode *i2c)
 {
-  I2C_F_REG(i2c->module) |= 0x28;
-  /*i2c_set_frequency(i2c);*/
+  i2c_set_frequency(i2c);
   I2C_C1_REG(i2c->module) |= I2C_C1_IICEN_MASK;
 }
 
@@ -160,17 +160,20 @@ void i2c_read(struct i2c_mode *i2c, uint8_t address, uint8_t *data, uint8_t leng
   I2C_C1_REG(i2c->module) &= (~I2C_C1_TX_MASK);
 
   // reading this register initiates receiving of the next byte
-  dummy = I2C_D_REG(i2c->module);
   for(i=0; i<length; i++) {
-    i2c_wait_rx(i2c->module);
     if(i == length-1) {
       I2C_C1_REG(i2c->module) |= I2C_C1_TXAK_MASK;
     }
-    data[i] = I2C_D_REG(i2c->module);
+    if(i) {
+      data[i-1] = I2C_D_REG(i2c->module);
+    } else {
+      dummy = I2C_D_REG(i2c->module);
+    }
+    i2c_wait_rx(i2c->module);
   }
-  i2c_wait_rx(i2c->module);
-  I2C_C1_REG(i2c->module) &= ~I2C_C1_TXAK_MASK;
-
   // Generate stop
   i2c_stop(i2c->module);
+
+  data[i-1] = I2C_D_REG(i2c->module);
+  I2C_C1_REG(i2c->module) &= ~I2C_C1_TXAK_MASK;
 }
